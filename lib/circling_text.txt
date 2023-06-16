@@ -10,9 +10,8 @@ end
 --add specific index control and linear equation support
 --add custom model support
 --link pac load library later
---add alpha functions
---fix flickering and reuse values
---todo asap: add lowercase letter support, forgot to before and entityID
+--fix flickering
+--todo asap: add lowercase letter support, forgot to before
 --bug: rarely, setting the position creates a value that is 50 units off, possibility from setting the pos too early
 if SERVER then
     local SText=class("SText")
@@ -55,6 +54,7 @@ if SERVER then
         self.space=2
         self.parent=nil
         
+        self.hookID=nil
         self.textTable[0]=holograms.create(self.position,self.rotation,"models/holograms/cplane.mdl",Vector(0))
         self.calcuText={}
         self.calcuRadius=nil
@@ -149,17 +149,23 @@ if SERVER then
         self.calcuRadius=self.radius/10
         self.calcuDegrees=360/(table.count(self.calcuText)+self.space)
         self.calcuDegreeIndex=Vector(0,20*self.calcuRadius,0)
+        self.calcuDegreeIndex:rotate(self.textTable[0]:getAngles())
         self.color[4]=self.alpha
         
         for i=1,table.count(self.calcuText),1 do --add queue to prevent instant text quota errors
             self.calcuDegreeIndex:rotate(Angle(0,self.calcuDegrees,0))
-            self.textTable[i]=holograms.create(self.textTable[0]:getPos()+self.calcuDegreeIndex,Angle(0,self.calcuDegrees*i,0),letterModel(self.calcuText[i]),self.scale)
+            --local pos,ang=localToWorld()
+            self.textTable[i]=holograms.create(self.textTable[0]:getPos()+self.calcuDegreeIndex,Angle(0,self.calcuDegrees*i,0)+self.textTable[0]:getAngles(),letterModel(self.calcuText[i]),self.scale)
             self.textTable[i]:setColor(self.color)
             if self.material then
                 self.textTable[i]:setMaterial(self.material)
             end
             self.textTable[i]:setParent(self.textTable[0])
         end
+        if self.hookID then
+            hook.remove("think","sv_rotation"..self.hookID)
+        end
+        self.hookID=self.text
         hook.add("think","sv_rotation"..self.text,function() --add rotation crossover to avoid setting 64 bit limit, a little useless - but a nice touch
             self.calcuRotation=self.calcuRotation+self.angVel
             if self.parent then
