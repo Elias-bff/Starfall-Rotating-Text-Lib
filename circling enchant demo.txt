@@ -1,0 +1,17 @@
+--@name Circling Enchant demo
+--@author
+--@include lib/circling_text.txt
+
+if SERVER then
+    local SText=require("lib/circling_text.txt")
+    local ent=chip():isWeldedTo()
+    local scale=1
+    
+    text=SText:new(ent:getModel(),5*scale,ent:getPos())
+    text:setAngles(Angle(0,0,90))
+    text:setAngVel(Vector(-0.2*scale,0,0))
+    text:setParent(ent)
+    text:setMaterial("models/wireframe")
+    text:setScale(Vector(0.1,0.1,0.2)*scale)
+    text:updateText()
+end

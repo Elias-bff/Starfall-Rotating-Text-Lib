@@ -1,0 +1,13 @@
+--@name Circling Word demo
+--@author
+--@server
+--@include lib/circling_text.txt
+local SText=require("lib/circling_text.txt")
+test=SText:new("HELLO",10,owner():getPos()+Vector(0,0,40))
+test:setAngVel(Angle(0,0.5,0))
+test:setMaterial("models/wireframe")
+test:setSpace(10)
+test:setParent(owner(),3)
+test:setAngles(Angle(0,0,0))
+test:setScale(Vector(0.75))
+test:updateText()

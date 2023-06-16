@@ -1,0 +1,58 @@
+--@name Last Said demo
+--@author
+--@include lib/circling_text.txt
+if SERVER then
+    local SText=require("lib/circling_text.txt")
+    test=SText:new("Message",20,owner():getPos()+Vector(0,0,40))
+    test:setAngVel(Angle(0,0.5,0))
+    test:setMaterial("models/wireframe")
+    test:setSpace(0)
+    test:setScale(Vector(1,1,1.25))
+    test:updateText()
+    test2=SText:new("Player Name",25,owner():getPos()+Vector(0,0,40))
+    test2:setAngVel(Angle(0,-0.2,0))
+    test2:setMaterial("models/wireframe")
+    test2:setSpace(8)
+    test2:setScale(Vector(0.5))
+    test2:updateText()
+    hook.add("think","",function()
+        test:setPos(owner():getPos()+Vector(0,0,40))
+        test2:setPos(owner():getPos()+Vector(0,0,40))
+    end)
+    net.receive("update_test",function()
+        test:clear()
+        test:setText(net.readString())
+        test:updateText()
+    end)
+    net.receive("update_test2",function()
+        test2:clear()
+        test2:setText(net.readString())
+        test2:updateText()
+    end)
+else
+    hook.add("PlayerChat","",function(ply,txt) --(Player ply, string text, boolean team, boolean isdead)
+        if isFirstTimePredicted() then
+            hook.add("think","",function() --replace with alpha functions later
+                if !state and owner():getVelocity():getLength()>1 then
+                    net.start("update_test")
+                    net.writeString("")
+                    net.send()
+                    net.start("update_test2")
+                    net.writeString("")
+                    net.send()
+                    state=true
+                elseif owner():getVelocity():getLength()<1 then
+                    state=false
+                end
+            end)
+        end
+        if owner():getVelocity():getLength()<1 then
+            net.start("update_test")
+            net.writeString(txt)
+            net.send()
+            net.start("update_test2")
+            net.writeString(ply:getName())
+            net.send()
+        end
+    end)
+end

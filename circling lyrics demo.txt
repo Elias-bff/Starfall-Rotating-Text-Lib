@@ -1,0 +1,23 @@
+--@name Circling Lyrics demo
+--@author
+--@include lib/circling_text.txt
+local lyrics={
+    [1]="Possession of the beggar and the king",
+    [2]="Everybody, everyday",
+    [3]="You and I, we all can say"
+}
+if SERVER then
+    local SText=require("lib/circling_text.txt")
+    local lyricTable={}
+    
+    for i=1,table.count(lyrics),1 do
+        lyricTable[i]=SText:new(lyrics[i],25,Vector())
+        lyricTable[i]:setAngVel(Angle(0,-0.1*i,0))
+        lyricTable[i]:setMaterial("models/wireframe")
+        lyricTable[i]:setSpace(8)
+        lyricTable[i]:setScale(Vector(0.5))
+        lyricTable[i]:updateText()
+        lyricTable[i]:setPos(chip():getPos()+chip():getUp()*i*10)
+        lyricTable[i]:setParent(chip())
+    end
+end
