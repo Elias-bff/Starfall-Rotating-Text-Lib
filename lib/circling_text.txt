@@ -12,6 +12,7 @@ end
 --link pac load library later
 --fix flickering
 --todo asap: add lowercase letter support, forgot to before
+--bug: updating text at a nonnormal angle results in strange effects, source identified - fixing soon.
 --bug: rarely, setting the position creates a value that is 50 units off, possibility from setting the pos too early
 if SERVER then
     local SText=class("SText")
@@ -55,7 +56,7 @@ if SERVER then
         self.parent=nil
         
         self.hookID=nil
-        self.textTable[0]=holograms.create(self.position,self.rotation,"models/holograms/cplane.mdl",Vector(0))
+        self.textTable[0]=holograms.create(self.position,self.rotation,"models/sprops/misc/axis_plane.mdl",Vector(0))
         self.calcuText={}
         self.calcuRadius=nil
         self.calcuDegrees=nil
@@ -153,8 +154,8 @@ if SERVER then
         self.color[4]=self.alpha
         
         for i=1,table.count(self.calcuText),1 do --add queue to prevent instant text quota errors
+            --self.parent:getPos()+self.parent:localToWorldVector(self.calcuDegreeIndex) --source of rotation error during update
             self.calcuDegreeIndex:rotate(Angle(0,self.calcuDegrees,0))
-            --local pos,ang=localToWorld()
             self.textTable[i]=holograms.create(self.textTable[0]:getPos()+self.calcuDegreeIndex,Angle(0,self.calcuDegrees*i,0)+self.textTable[0]:getAngles(),letterModel(self.calcuText[i]),self.scale)
             self.textTable[i]:setColor(self.color)
             if self.material then
@@ -168,7 +169,7 @@ if SERVER then
         self.hookID=self.text
         hook.add("think","sv_rotation"..self.text,function() --add rotation crossover to avoid setting 64 bit limit, a little useless - but a nice touch
             self.calcuRotation=self.calcuRotation+self.angVel
-            if self.parent then
+            if self.parent then --make into function later
                 self.textTable[0]:setAngles(self.parent:localToWorldAngles(self.rotation+self.calcuRotation))
             else
                 local pos,ang=localToWorld(self.position,self.calcuRotation,self.position,self.rotation)
