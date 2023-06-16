@@ -12,10 +12,35 @@ end
 --link pac load library later
 --add alpha functions
 --fix flickering and reuse values
---todo asap: add lowercase letter support, forgot to before
+--todo asap: add lowercase letter support, forgot to before and entityID
 --bug: rarely, setting the position creates a value that is 50 units off, possibility from setting the pos too early
 if SERVER then
     local SText=class("SText")
+    local modelTable={}
+    modelTable.__index={
+        ["_"]="underscore",
+        [":"]="colon",
+        [";"]="scolon",
+        ["^"]="crt",
+        ["%"]="pcnt",
+        ["."]="prd",
+        ["'"]="apost",
+        [","]="com",
+        ["!"]="xmark",
+        ["?"]="qmark",
+        ["("]="lpar",
+        [")"]="rpar",
+        ["<"]="lessthan",
+        [">"]="greaterthan",
+        ["/"]="div",
+        ["*"]="ast",
+        ["+"]="plu",
+        ["-"]="min",
+        ["["]="lbracket",
+        ["]"]="rbracket"
+    }
+    local models={}
+    setmetatable(models,modelTable)
     function SText:initialize(text,radius,position)
         self.text=text
         self.textTable={}
@@ -102,71 +127,17 @@ if SERVER then
     end
     function letterModel(letter)
         local letter=string.lower(letter)
+        local letterI=models[string.lower(letter)] 
         
-        switch(letter,{ --can probably make a better system than this
-            ["_"]=function()
-                letter="underscore"
-            end,
-            [":"]=function()
-                letter="colon"
-            end,
-            [";"]=function()
-                letter="scolon"
-            end,
-            ["^"]=function()
-                letter="crt"
-            end,
-            ["."]=function()
-                letter="prd"
-            end,
-            ["'"]=function()
-                letter="apost"
-            end,
-            [","]=function()
-                letter="com"
-            end,
-            ["!"]=function()
-                letter="xmark"
-            end,
-            ["?"]=function()
-                letter="qmark"
-            end,
-            ["("]=function()
-                letter="lpar"
-            end,
-            [")"]=function()
-                letter="rpar"
-            end,
-            ["<"]=function()
-                letter="lessthan"
-            end,
-            [">"]=function()
-                letter="greaterthan"
-            end,
-            ["/"]=function()
-                letter="div"
-            end,
-            ["*"]=function()
-                letter="ast"
-            end,
-            ["+"]=function()
-                letter="plu"
-            end,
-            ["-"]=function()
-                letter="min"
-            end,
-            ["["]=function()
-                letter="lbracket"
-            end,
-            ["]"]=function()
-                letter="rbracket"
-            end,
-            }
-        )
-        if letter==" " then 
+        if letterI==nil and !string.find("eqwertyuiopasdfghjklzxcvbnm1234567890 ",string.lower(letter),0) then
+            return "models/sprops/misc/alphanum/alphanum_qmark.mdl"
+        elseif letterI==nil then
+            letterI=letter
+        end
+        if letterI==" " then 
             return "models/sprops/misc/empty.mdl"
         end
-        return "models/sprops/misc/alphanum/alphanum_"..letter..".mdl"
+        return "models/sprops/misc/alphanum/alphanum_"..letterI..".mdl"
     end
     function SText:clear()
         for i=1,table.count(self.calcuText),1 do
@@ -181,9 +152,6 @@ if SERVER then
         self.color[4]=self.alpha
         
         for i=1,table.count(self.calcuText),1 do --add queue to prevent instant text quota errors
-            if !string.find("qwertyuiopasdfghjklzxcvbnm1234567890 ",string.lower(self.calcuText[i]),0) then
-                self.calcuText[i]="?"
-            end
             self.calcuDegreeIndex:rotate(Angle(0,self.calcuDegrees,0))
             self.textTable[i]=holograms.create(self.textTable[0]:getPos()+self.calcuDegreeIndex,Angle(0,self.calcuDegrees*i,0),letterModel(self.calcuText[i]),self.scale)
             self.textTable[i]:setColor(self.color)
