@@ -11,7 +11,6 @@ end
 --add custom model support
 --link pac load library later
 --fix flickering
---todo asap: add lowercase letter support, forgot to before
 --bug: updating text at a nonnormal angle results in strange effects, source identified - fixing soon.
 --bug: rarely, setting the position creates a value that is 50 units off, possibility from setting the pos too early
 if SERVER then
@@ -127,13 +126,17 @@ if SERVER then
         return self.alpha
     end
     function letterModel(letter)
-        local letter=string.lower(letter)
+        local letterLower=string.lower(letter)
         local letterI=models[string.lower(letter)] 
         
         if letterI==nil and !string.find("eqwertyuiopasdfghjklzxcvbnm1234567890 ",string.lower(letter),0) then
             return "models/sprops/misc/alphanum/alphanum_qmark.mdl"
         elseif letterI==nil then
-            letterI=letter
+            if letterLower!=letter then
+                letterI="l_"..letterLower
+            else
+                letterI=letterLower
+            end
         end
         if letterI==" " then 
             return "models/sprops/misc/empty.mdl"
