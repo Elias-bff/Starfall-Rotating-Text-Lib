@@ -129,17 +129,17 @@ if SERVER then
         local letterLower=string.lower(letter)
         local letterI=models[string.lower(letter)] 
         
-        if letterI==nil and !string.find("eqwertyuiopasdfghjklzxcvbnm1234567890 ",string.lower(letter),0) then
+        if letter==" " then 
+            return "models/sprops/misc/empty.mdl"
+        end
+        if letterI==nil and !string.find("eqwertyuiopasdfghjklzxcvbnm1234567890",string.lower(letter),0) then
             return "models/sprops/misc/alphanum/alphanum_qmark.mdl"
         elseif letterI==nil then
-            if letterLower!=letter then
+            if letterLower==letter then
                 letterI="l_"..letterLower
             else
                 letterI=letterLower
             end
-        end
-        if letterI==" " then 
-            return "models/sprops/misc/empty.mdl"
         end
         return "models/sprops/misc/alphanum/alphanum_"..letterI..".mdl"
     end
