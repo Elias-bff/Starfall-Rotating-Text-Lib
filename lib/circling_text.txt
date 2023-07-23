@@ -110,7 +110,7 @@ if SERVER then
     function SText:getMaterial()
         return self.material
     end
-    function SText:disbaleShading(bool)
+    function SText:disableShading(bool)
         self.suppressShading=bool
     end
     function SText:setColor(color)
@@ -130,6 +130,12 @@ if SERVER then
     end
     function SText:getAlpha()
         return self.alpha
+    end
+    function SText:setRadius(radius)
+        self.radius=radius
+    end
+    function SText:getRadius()
+        return self.radius
     end
     function letterModel(letter)
         local letterLower=string.lower(letter)
@@ -180,9 +186,9 @@ if SERVER then
             hook.remove("think","sv_rotation"..self.hookID)
         end
         
-        self.hookID=self.text
+        self.hookID=table.address(self)
         
-        hook.add("think","sv_rotation"..self.text,function() --add rotation crossover to avoid setting 64 bit limit, a little useless - but a nice touch
+        hook.add("think","sv_rotation"..table.address(self),function() --add rotation crossover to avoid setting 64 bit limit, a little useless - but a nice touch
             self.calcuRotation=self.calcuRotation+self.angVel
             
             if self.parent then --make into function later

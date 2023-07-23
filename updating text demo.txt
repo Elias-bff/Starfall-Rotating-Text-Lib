@@ -7,7 +7,7 @@ if SERVER then
     test=SText:new(timer.realtime(),10,Vector())
     test:setAngVel(Angle(0,-0.2,0))
     test:setMaterial("models/debug/debugwhite")
-    test:disbaleShading(true)
+    test:disableShading(true)
     test:setSpace(0)
     test:setScale(Vector(0.2))
     test:setPos(chip():getPos()+chip():getUp()*5)
