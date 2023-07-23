@@ -1,4 +1,4 @@
---@name Circling text demo
+--@name Updating text demo
 --@author
 --@include circling_text.txt
 if SERVER then
@@ -13,6 +13,7 @@ if SERVER then
     test:setPos(chip():getPos()+chip():getUp()*5)
     test:setParent(chip())
     test:updateText()
+    
     function update()
         timer.simple(0.1,function()
             test:clear()
@@ -22,5 +23,6 @@ if SERVER then
             update()
         end)
     end
+    
     update()
 end
