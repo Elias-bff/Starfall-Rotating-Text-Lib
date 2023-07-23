@@ -12,6 +12,7 @@ end
 --link pac load library later
 --fix flickering
 --bug: updating text at a nonnormal angle results in strange effects, source identified - fixing soon.
+--add set bone parent method
 --bug: rarely, setting the position creates a value that is 50 units off, possibility from setting the pos too early
 if SERVER then
     local SText=class("SText")
@@ -40,6 +41,7 @@ if SERVER then
     }
     local models={}
     setmetatable(models,modelTable)
+    
     function SText:initialize(text,radius,position)
         self.text=text
         self.textTable={}
@@ -48,6 +50,7 @@ if SERVER then
         self.color=Color(255,255,255)
         self.alpha=255
         self.material=nil
+        self.suppressShading=false
         self.scale=Vector(1)
         self.angVel=Angle()
         self.radius=radius
@@ -107,6 +110,9 @@ if SERVER then
     function SText:getMaterial()
         return self.material
     end
+    function SText:disbaleShading(bool)
+        self.suppressShading=bool
+    end
     function SText:setColor(color)
         self.color=color
     end
@@ -132,55 +138,62 @@ if SERVER then
         if letter==" " then 
             return "models/sprops/misc/empty.mdl"
         end
+        
         if letterI==nil and !string.find("eqwertyuiopasdfghjklzxcvbnm1234567890",string.lower(letter),0) then
             return "models/sprops/misc/alphanum/alphanum_qmark.mdl"
         elseif letterI==nil then
-            if letterLower==letter then
+            if letterLower==letter and !string.find("1234567890",letter) then
                 letterI="l_"..letterLower
             else
                 letterI=letterLower
             end
         end
+        
         return "models/sprops/misc/alphanum/alphanum_"..letterI..".mdl"
     end
     function SText:clear()
-        for i=1,table.count(self.calcuText),1 do
+        for i=1,#self.calcuText do
             self.textTable[i]:remove()
         end
     end
     function SText:updateText() --code slimming needed asap, too much code that does useless math
         self.calcuText=string.toTable(self.text)
         self.calcuRadius=self.radius/10
-        self.calcuDegrees=360/(table.count(self.calcuText)+self.space)
+        self.calcuDegrees=360/(#self.calcuText+self.space)
         self.calcuDegreeIndex=Vector(0,20*self.calcuRadius,0)
         self.calcuDegreeIndex:rotate(self.textTable[0]:getAngles())
         self.color[4]=self.alpha
         
-        for i=1,table.count(self.calcuText),1 do --add queue to prevent instant text quota errors
+        for i=1,#self.calcuText,1 do --add queue to prevent instant text quota errors
             --self.parent:getPos()+self.parent:localToWorldVector(self.calcuDegreeIndex) --source of rotation error during update
             self.calcuDegreeIndex:rotate(Angle(0,self.calcuDegrees,0))
             self.textTable[i]=holograms.create(self.textTable[0]:getPos()+self.calcuDegreeIndex,Angle(0,self.calcuDegrees*i,0)+self.textTable[0]:getAngles(),letterModel(self.calcuText[i]),self.scale)
             self.textTable[i]:setColor(self.color)
+            self.textTable[i]:suppressEngineLighting(self.suppressShading)
+            
             if self.material then
                 self.textTable[i]:setMaterial(self.material)
             end
+            
             self.textTable[i]:setParent(self.textTable[0])
         end
         if self.hookID then
             hook.remove("think","sv_rotation"..self.hookID)
         end
+        
         self.hookID=self.text
+        
         hook.add("think","sv_rotation"..self.text,function() --add rotation crossover to avoid setting 64 bit limit, a little useless - but a nice touch
             self.calcuRotation=self.calcuRotation+self.angVel
+            
             if self.parent then --make into function later
                 self.textTable[0]:setAngles(self.parent:localToWorldAngles(self.rotation+self.calcuRotation))
             else
-                local pos,ang=localToWorld(self.position,self.calcuRotation,self.position,self.rotation)
+                local _,ang=localToWorld(self.position,self.calcuRotation,self.position,self.rotation)
+                
                 self.textTable[0]:setAngles(ang)
             end
         end)
     end
     return SText
-else
-    
 end

@@ -1,0 +1,26 @@
+--@name Circling text demo
+--@author
+--@include circling_text.txt
+if SERVER then
+    local SText=require("circling_text.txt")
+    
+    test=SText:new(timer.realtime(),10,Vector())
+    test:setAngVel(Angle(0,-0.2,0))
+    test:setMaterial("models/debug/debugwhite")
+    test:disbaleShading(true)
+    test:setSpace(0)
+    test:setScale(Vector(0.2))
+    test:setPos(chip():getPos()+chip():getUp()*5)
+    test:setParent(chip())
+    test:updateText()
+    function update()
+        timer.simple(0.1,function()
+            test:clear()
+            test:setColor(Color(timer.realtime()*40,1,1):hsvToRGB())
+            test:setText(string.sub(cpuUsed(),1,10))
+            test:updateText()
+            update()
+        end)
+    end
+    update()
+end
