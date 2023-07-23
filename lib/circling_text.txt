@@ -166,7 +166,7 @@ if SERVER then
         
         for i=1,#self.calcuText,1 do --add queue to prevent instant text quota errors
             self.calcuDegreeIndex:rotate(Angle(0,self.calcuDegrees,0))
-            self.textTable[i]=holograms.create(self.textTable[0]:getPos()+self.parent:localToWorldVector(self.calcuDegreeIndex),self.textTable[0]:localToWorldAngles(Angle(0,self.calcuDegrees*i,0)),letterModel(self.calcuText[i]),self.scale)
+            self.textTable[i]=holograms.create(self.textTable[0]:getPos()+(self.parent and self.parent:localToWorldVector(self.calcuDegreeIndex) or self.calcuDegreeIndex),self.textTable[0]:localToWorldAngles(Angle(0,self.calcuDegrees*i,0)),letterModel(self.calcuText[i]),self.scale)
             self.textTable[i]:setColor(self.color)
             self.textTable[i]:suppressEngineLighting(self.suppressShading)
             
